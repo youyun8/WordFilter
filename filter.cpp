@@ -7,6 +7,7 @@
 
 void insertWords(std::ifstream& in, Trie& trie);
 int getStrSize(const std::string& str);
+void getFilteredResult(const std::string& str, Trie& trie, std::string& currStr);
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -34,29 +35,8 @@ int main(int argc, char* argv[]) {
     std::string str;
 
     while (std::getline(inputFile, str)) {
-        int strPtr = 0;
         std::string currStr;
-        std::string temp;
-        auto currNode = trie.root;
-        while (strPtr < str.size()) {
-            if ((currNode->table).count(str[strPtr]) == 0) {
-                if (currNode == trie.root) {
-                    currStr.push_back(str[strPtr++]);
-                } else if (currNode->flag) {
-                    currStr += std::string(getStrSize(temp), 'x');
-                    temp.clear();
-                    currNode = trie.root;
-                } else {
-                    currNode = currNode->suffix;
-                    int prevSize = temp.size() - currNode->length;
-                    currStr += temp.substr(0, prevSize);
-                    temp = temp.substr(prevSize);
-                }
-            } else {
-                currNode = (currNode->table)[str[strPtr]];
-                temp.push_back(str[strPtr++]);
-            }
-        }
+        getFilteredResult(str, trie, currStr);
         outputFile << currStr << std::endl;
     }
 
@@ -99,4 +79,29 @@ int getStrSize(const std::string& str) {
         }
     }
     return length;
+}
+
+void getFilteredResult(const std::string& str, Trie& trie, std::string& currStr) {
+    std::string temp;
+    auto currNode = trie.root;
+    int strPtr = 0;
+    while (strPtr < str.size()) {
+        if ((currNode->table).count(str[strPtr]) == 0) {
+            if (currNode == trie.root) {
+                currStr.push_back(str[strPtr++]);
+            } else if (currNode->flag) {
+                currStr += std::string(getStrSize(temp), 'x');
+                temp.clear();
+                currNode = trie.root;
+            } else {
+                currNode = currNode->suffix;
+                int prevSize = temp.size() - currNode->length;
+                currStr += temp.substr(0, prevSize);
+                temp = temp.substr(prevSize);
+            }
+        } else {
+            currNode = (currNode->table)[str[strPtr]];
+            temp.push_back(str[strPtr++]);
+        }
+    }
 }
