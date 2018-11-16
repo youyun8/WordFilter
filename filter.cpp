@@ -27,6 +27,8 @@ int main(int argc, char* argv[]) {
     insertWords(wordFile, trie);
     wordFile.close();
 
+    trie.build();
+
     std::ifstream inputFile(inputFileStr.c_str());
     std::ofstream outputFile(outputFileStr.c_str());
     std::string str;
@@ -34,19 +36,30 @@ int main(int argc, char* argv[]) {
     while (std::getline(inputFile, str)) {
         int strPtr = 0;
         std::string currStr;
+        std::string temp;
+        auto currNode = trie.root;
         while (strPtr < str.size()) {
-            std::string temp = str.substr(strPtr); 
-            auto result = trie.search(temp);
-            if (result.first) {
-                int length = getStrSize(temp.substr(0, result.second));
-                currStr += std::string(length, 'x');
-                strPtr += result.second;
+            if ((currNode->table).count(str[strPtr]) == 0) {
+                if (currNode == trie.root) {
+                    currStr.push_back(str[strPtr++]);
+                } else if (currNode->flag) {
+                    currStr += std::string(getStrSize(temp), 'x');
+                    temp.clear();
+                    currNode = trie.root;
+                } else {
+                    currNode = currNode->suffix;
+                    int prevSize = temp.size() - currNode->length;
+                    currStr += temp.substr(0, prevSize);
+                    temp = temp.substr(prevSize);
+                }
             } else {
-                currStr.push_back(str[strPtr++]);
+                currNode = (currNode->table)[str[strPtr]];
+                temp.push_back(str[strPtr++]);
             }
         }
         outputFile << currStr << std::endl;
     }
+
     clock_t endTime = clock();
     std::cout << "It took " << static_cast<double>(endTime - startTime)/CLOCKS_PER_SEC << " seconds." << std::endl;
     

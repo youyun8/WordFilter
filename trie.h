@@ -4,17 +4,15 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <memory>
+#include <queue>
 #include "trieNode.h"
 
-class Trie {
-public:
+struct Trie {
     Trie();
-    ~Trie();
     void insert(const std::string& str);
-    std::pair<bool, int> search(const std::string& str);
-private:
-    TrieNode* root;
-    std::vector<TrieNode*> nodeList;
+    void build();
+    std::shared_ptr<TrieNode> root;
 };
 
 #endif
